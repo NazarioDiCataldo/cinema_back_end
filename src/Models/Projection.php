@@ -17,7 +17,7 @@ class Projection extends BaseModel {
     /**
      * Nome della collection
      */
-    protected static ?string $table = "movies";
+    protected static ?string $table = "projections";
 
     public function __construct(array $data = []) {
         parent::__construct($data);
@@ -26,10 +26,19 @@ class Projection extends BaseModel {
     protected static function validationRules(): array {
         return [
             "movie_id" => ["required", "sometimes", "numeric", "min:1", "max:50"],
-            "places" => ["required", "sometimes", "numeric", "min:1", "max:50"],
+            "hall_id" => ["required", "sometimes", "numeric", "min:1", "max:50"],
             "takings" => ["numeric", "min:0"],
             "projection_date" => ["datetime"]
         ];
     }
 
+    protected function movie()
+    {
+        return $this->belongsTo(Movie::class);
+    }
+
+    protected function hall()
+    {
+        return $this->belongsTo(Hall::class);
+    }
 }

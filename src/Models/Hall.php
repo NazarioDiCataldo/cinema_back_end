@@ -16,7 +16,7 @@ class Hall extends BaseModel {
     /**
      * Nome della collection
      */
-    protected static ?string $table = "movies";
+    protected static ?string $table = "halls";
 
     public function __construct(array $data = []) {
         parent::__construct($data);
@@ -30,4 +30,8 @@ class Hall extends BaseModel {
         ];
     }
 
+    protected function projections()
+    {
+        return $this->hasMany(Projection::class);
+    }
 }

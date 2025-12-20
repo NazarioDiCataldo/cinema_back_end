@@ -37,6 +37,24 @@ Router::get('/movies/{id}', function ($id) {
     }
 });
 
+/**
+ * GET /api/movies/{id}/actors - Casting di un film
+ */
+Router::get('/movies/{id}/actors', function ($id) {
+    try {
+        $movie = Movie::find($id);
+
+        if($movie === null) {
+            Response::error('Film non trovato', Response::HTTP_NOT_FOUND)->send();
+        }
+
+        $actors = $movie->actors;
+
+        Response::success($actors)->send();
+    } catch (\Exception $e) {
+        Response::error("Errore nel recupero dei film: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
 
 /**
  * POST /api/movies - Crea nuovo Attore

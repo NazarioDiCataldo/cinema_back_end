@@ -14,6 +14,7 @@ use Pecee\SimpleRouter\SimpleRouter as Router;
 Router::get('/halls', function () {
     try {
         $hall = Hall::all();
+
         Response::success($hall)->send();
     } catch (\Exception $e) {
         Response::error("Errore nel recupero delle sale: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
@@ -37,6 +38,30 @@ Router::get('/halls/{id}', function ($id) {
     }
 });
 
+/**
+ * GET /api/halls/{id}/projections - Lista proiezioni di una sala
+ */
+Router::get('/halls/{id}/movies', function ($id) {
+    try {
+        $hall = Hall::find($id);
+
+        if($hall === null) {
+            Response::error('Sala non trovata', Response::HTTP_NOT_FOUND)->send();
+        }
+
+        //Mi prendo tutte le proiezioni di una sala
+        $projections = $hall->projections;
+
+        //Per ogni proiezioni, mi prendo il film collegato
+        $movies = array_map(function ($proj) {
+            return $proj->movie;
+        }, $projections);
+
+        Response::success($movies)->send();
+    } catch (\Exception $e) {
+        Response::error("Errore nel recupero delle sale: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
 
 /**
  * POST /api/halls - Crea nuovo sala

@@ -37,6 +37,26 @@ Router::get('/actors/{id}', function ($id) {
     }
 });
 
+/* 
+    * GET /api/actors/{id}/movies - Lista di film in cui ha recitato l'attore
+*/
+
+Router::get('/actors/{id}/movies', function ($id) {
+    try {
+        $actor = Actor::find($id);
+
+        if($actor === null) {
+            Response::error('Attore non trovato', Response::HTTP_NOT_FOUND)->send();
+        }
+
+        //Mi prendo i film dell'attore
+        $movies = $actor->movies;
+
+        Response::success($movies)->send();
+    } catch (\Exception $e) {
+        Response::error("Errore nel recupero degli attori: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
 
 /**
  * POST /api/actors - Crea nuovo Attore

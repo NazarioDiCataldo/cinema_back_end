@@ -36,4 +36,14 @@ class Movie extends BaseModel {
         ];
     }
 
+    protected function actors()
+    {
+        return $this->belongsToMany(Actor::class);
+    }
+
+    protected function projections()
+    {
+        return $this->hasMany(Projection::class);
+    }
+
 }
