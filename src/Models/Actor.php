@@ -13,6 +13,9 @@ class Actor extends BaseModel {
     public ?int $birth_year = null;
     public ?string $nationality = null;
 
+    //Whitelist di filtri permessi per questa classe 
+    protected static array $allowed_filters = ['nationality', 'birth_year_from', 'birth_year_to', 'name'];
+
     /**
      * Nome della collection
      */
@@ -30,6 +33,84 @@ class Actor extends BaseModel {
             "nationality" => ["min:2", "max:50"]
         ];
     }
+
+    public static function filter(array $params): array
+    {
+        $conditions = []; //Conterrà tutte gli AND
+        $bindings = [];
+
+        if (!empty($params['nationality'])) {
+            static::filterByNationality($params['nationality'], $conditions, $bindings);
+        }
+
+        if (!empty($params['birth_year_from'])) {
+            static::filterByBirthYearFrom((int)$params['birth_year_from'], $conditions, $bindings);
+        }
+
+        if (!empty($params['birth_year_to'])) {
+            static::filterByBirthYearTo((int)$params['birth_year_to'], $conditions, $bindings);
+        }
+
+        if (!empty($params['name'])) {
+            static::search($params['name'], 'name' ,$conditions, $bindings);
+        }
+
+        $where = '';
+        if ($conditions) {
+            $where = ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        $sql = "SELECT * FROM " . static::getTableName() . $where;
+
+        $rows = DB::select($sql, $bindings);
+
+        return array_map(fn($row) => new static($row), $rows);
+    }
+
+    /**
+     * Filtra la ricerca per nazionalità
+     * @param array | string $value -> Rappresenta i valori provenienti dalla query string 'nationality'  ($_GET['nationality'])
+     * @param array $conditions -> Rappresenta l'array con tutte le query da concatenare
+     * @param array $bindings -> Rappresenta l'array con tutti i bindings per PDO
+     * Utilizziamo l'accesso per riferimento, per modificare gli array originali
+     */
+    protected static function filterByNationality(string | array $value, array &$conditions, array &$bindings):void {
+
+        //Prima verifico se value è un array o no
+        /** 
+         * $_GET['nationality'] = [0 => 'Italia', 1 => 'Francia]
+         * $_GET['nationality'] = 'Italia' 
+        */
+
+        if(is_array($value)) {
+            $placeholders = [];
+
+            foreach ($value as $i => $val) {
+                $ph = ":nationality_$i";
+                $placeholders[] = $ph;
+                $bindings[$ph] = trim($val);
+            }
+
+            $conditions[] = 'nationality IN (' . implode(',', $placeholders) . ')'; // nationality IN (:nationality_0,:nationality_1)
+
+        } else {
+            $conditions[] = 'nationality = :nationality';
+            $bindings[':nationality'] = trim($value);
+        }
+
+    }
+
+    protected static function filterByBirthYearFrom(int $value, array &$conditions, array &$bindings):void {
+        $conditions[] = 'birth_year >= :birth_year_from';
+        $bindings[':birth_year_from'] = $value;
+    }
+
+    protected static function filterByBirthYearTo(int $value, array &$conditions, array &$bindings):void {
+        $conditions[] = 'birth_year <= :birth_year_to';
+        $bindings[':birth_year_to'] = $value;
+    }
+
+    
 
     protected function movies()
     {

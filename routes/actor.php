@@ -2,7 +2,7 @@
 
 /* Routes per gestione attori */
 
-
+use App\Database\DB;
 use App\Utils\Response;
 use App\Models\Actor;
 use App\Utils\Request;
@@ -13,7 +13,16 @@ use Pecee\SimpleRouter\SimpleRouter as Router;
  */
 Router::get('/actors', function () {
     try {
-        $actors = Actor::all();
+        $params = Actor::filterParams($_GET);
+
+        //Verifico se ci sono delle query string
+        if($params !== null) {
+            $actors = Actor::filter($params);
+        } else {
+            //altrimenti, prendi tutti i risultati
+            $actors = Actor::all();
+        }
+        
         Response::success($actors)->send();
     } catch (\Exception $e) {
         Response::error("Errore nel recupero degli attori: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();

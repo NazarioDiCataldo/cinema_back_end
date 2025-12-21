@@ -15,6 +15,9 @@ abstract class BaseModel
     public ?string $updated_at = null;
 
     protected static string $collection;
+
+    //Whitelist di filtri permessi per questa classe 
+    protected static array $allowed_filters = [];
     
     /**
      * Driver database da utilizzare: 'json' o 'database'
@@ -40,6 +43,46 @@ abstract class BaseModel
     }
 
     /**
+     * Ritorna tutti i filtri consentiti
+     */
+    public static function getAllowedFilters(): array {
+        return static::$allowed_filters;
+    }
+
+    /**
+     * Filtra i parametri della $_GET eliminando quelli che non sono nella whitelist
+     */
+    public static function filterParams(array $param): ?array {
+        $params = null;
+        
+        //Verifico se $_GET sia vuoto
+        if(!empty($_GET)) {
+            //se non è vuoto filtro rimuovo tutti quei filtri che non sono nella whitelist
+            $params = array_filter($_GET, function ($value) {
+                return in_array($value, Actor::getAllowedFilters());
+            }, ARRAY_FILTER_USE_KEY);
+        }
+
+        return $params;
+    }
+
+    /**
+     * Restuisce record che hanno una determinata sottostringa 
+    */
+    protected static function search(string $value, string $column, array &$conditions, array &$bindings):void {
+        
+        //Prima faccio il trim del valore
+        $term = "%" . trim($value) . "%";
+
+        //Aggiungo un suffisso numerico per rendere univoco il placeholder -> :search_1, :search_2
+        $ph = ":search_" . count($bindings);
+
+        //Creo la query di confronto con il nome della colonna passato in modo dinamico e il valore dell'utente
+        $conditions[] = "$column ILIKE $ph";
+        $bindings[$ph] = $term;
+    }
+
+    /**
      * Ottiene il prossimo ID disponibile
      */
     protected static function getNextId(): int
@@ -51,10 +94,16 @@ abstract class BaseModel
         }
     }
 
+    /* 
+     * Abstract perchè il metodo deve essere modellato in ogni classe figlia
+     * Serve a filtrare, tramite condizioni passate per il get
+    */
+    abstract public static function filter(array $data): array;
+
     /**
      * Ottiene il nome della tabella
      */
-    protected static function getTableName(): string
+    public static function getTableName(): string
     {
         return static::$table ?? static::$collection;
     }
