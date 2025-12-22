@@ -14,7 +14,14 @@ class Actor extends BaseModel {
     public ?string $nationality = null;
 
     //Whitelist di filtri permessi per questa classe 
-    protected static array $allowed_filters = ['nationality', 'birth_year_from', 'birth_year_to', 'name'];
+    protected static array $allowed_filters = [
+        "order_by", 
+        "order",
+        'nationality', 
+        'birth_year_from', 
+        'birth_year_to',
+        'name'
+    ];
 
     /**
      * Nome della collection
@@ -55,12 +62,17 @@ class Actor extends BaseModel {
             static::search($params['name'], 'name' ,$conditions, $bindings);
         }
 
+        //Order by
+        $column = $params['order_by'] ?? 'id';
+        $order = $params['order'] ?? 'ASC';
+        $order_by = static::orderBy($column, $order, $conditions, $bindings);
+
         $where = '';
         if ($conditions) {
             $where = ' WHERE ' . implode(' AND ', $conditions);
         }
 
-        $sql = "SELECT * FROM " . static::getTableName() . $where;
+        $sql = "SELECT * FROM " . static::getTableName() . $where . $order_by;
 
         $rows = DB::select($sql, $bindings);
 

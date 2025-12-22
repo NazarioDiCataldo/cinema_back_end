@@ -17,7 +17,7 @@ abstract class BaseModel
     protected static string $collection;
 
     //Whitelist di filtri permessi per questa classe 
-    protected static array $allowed_filters = [];
+    protected static array $allowed_filters = ["order_by", "order"];
     
     /**
      * Driver database da utilizzare: 'json' o 'database'
@@ -64,6 +64,26 @@ abstract class BaseModel
         }
 
         return $params;
+    }
+
+    /**
+     * Ordina i risultati  
+     */
+    protected static function orderBy(string $column = 'id', string $order = 'ASC'):string {
+        //Se l'utente inserisce un ordine diverso da ASC o DESC, viene impostato di default ASC
+        $order = strtoupper(trim($order));
+        $order = in_array($order, ['ASC', 'DESC']) ? $order : 'ASC';
+
+        // whitelist colonne
+        $allowed_columns = array_keys(get_class_vars(static::class));
+
+        //Verifico che il nome della colonna sia inclusa tra le proprietà dell'oggetto
+        if(!in_array($column, $allowed_columns)) {
+            //Se non è inclusa do di default id
+            $column = 'id';
+        }
+
+        return " ORDER BY $column $order"; //-> ORDER BY id ASC
     }
 
     /**

@@ -16,7 +16,16 @@ class Movie extends BaseModel {
     public ?string $genre = null;
 
     //Whitelist di filtri permessi per questa classe 
-    protected static array $allowed_filters = ['nationality', 'title', 'director', 'genre', 'production_year_from', 'production_year_to'];
+    protected static array $allowed_filters = [
+        "order_by", 
+        "order",
+        'nationality',
+        'title',
+        'director', 
+        'genre', 
+        'production_year_from', 
+        'production_year_to'
+    ];
 
     /**
      * Nome della collection
@@ -68,12 +77,17 @@ class Movie extends BaseModel {
             static::search($params['director'], 'director' ,$conditions, $bindings);
         }
 
+        //Order by
+        $column = $params['order_by'] ?? 'id';
+        $order = $params['order_by'] ?? 'ASC';
+        $order_by = static::orderBy($column, $order, $conditions, $bindings);
+
         $where = '';
         if ($conditions) {
             $where = ' WHERE ' . implode(' AND ', $conditions);
         }
 
-        $sql = "SELECT * FROM " . static::getTableName() . $where;
+        $sql = "SELECT * FROM " . static::getTableName() . $where . $order_by;
 
         $rows = DB::select($sql, $bindings);
 

@@ -20,7 +20,14 @@ class Projection extends BaseModel {
     protected static ?string $table = "projections";
 
     //Whitelist di filtri permessi per questa classe 
-    protected static array $allowed_filters = ['projection_date_from', 'projection_date_to', 'takings_from', 'takings_to'];
+    protected static array $allowed_filters = [
+        "order_by", 
+        "order",
+        'projection_date_from', 
+        'projection_date_to', 
+        'takings_from', 
+        'takings_to'
+    ];
 
     public function __construct(array $data = []) {
         parent::__construct($data);
@@ -56,12 +63,17 @@ class Projection extends BaseModel {
             static::filterByTakingsTo((float)$params['takings_to'], $conditions, $bindings);
         }
 
+        //Order by
+        $column = $params['order_by'] ?? 'id';
+        $order = $params['order'] ?? 'ASC';
+        $order_by = static::orderBy($column, $order, $conditions, $bindings);
+
         $where = '';
         if ($conditions) {
             $where = ' WHERE ' . implode(' AND ', $conditions);
         }
 
-        $sql = "SELECT * FROM " . static::getTableName() . $where;
+        $sql = "SELECT * FROM " . static::getTableName() . $where . $order_by;
 
         $rows = DB::select($sql, $bindings);
 

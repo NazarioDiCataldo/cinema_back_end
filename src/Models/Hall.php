@@ -19,7 +19,14 @@ class Hall extends BaseModel {
     protected static ?string $table = "halls";
 
     //Whitelist di filtri permessi per questa classe 
-    protected static array $allowed_filters = ['city', 'places_from', 'places_to', 'name'];
+    protected static array $allowed_filters = [
+        "order_by", 
+        "order",
+        'city', 
+        'places_from',
+        'places_to',
+        'name'
+    ];
 
     public function __construct(array $data = []) {
         parent::__construct($data);
@@ -46,12 +53,17 @@ class Hall extends BaseModel {
             static::search($params['city'], 'city' ,$conditions, $bindings);
         }
 
+        //Order by
+        $column = $params['order_by'] ?? 'id';
+        $order = $params['order'] ?? 'ASC';
+        $order_by = static::orderBy($column, $order, $conditions, $bindings);
+
         $where = '';
         if ($conditions) {
             $where = ' WHERE ' . implode(' AND ', $conditions);
         }
 
-        $sql = "SELECT * FROM " . static::getTableName() . $where;
+        $sql = "SELECT * FROM " . static::getTableName() . $where . $order_by;
 
         $rows = DB::select($sql, $bindings);
 
