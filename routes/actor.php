@@ -41,6 +41,43 @@ Router::get('/actors/nationalities', function() {
 });
 
 /**
+ * GET /api/actors/min_birth_year - Età più bassa
+ */
+Router::get('/actors/min_birth_year', function() {
+    try {
+        //Mi prendo tutte le nazionalità
+        $min = Actor::getMinYear();
+
+        if(empty($min)) {
+            Response::error("Nessun età minima trovata", Response::HTTP_BAD_REQUEST)->send();
+        }
+
+        Response::success($min[0])->send();
+    } catch(\Exception $e) {
+        Response::error("Errore nel recupero dell'età più bassa: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
+
+/**
+ * GET /api/actors/max_birth_year - Età più alta
+ */
+Router::get('/actors/max_birth_year', function() {
+    try {
+        //Mi prendo tutte le nazionalità
+        $max = Actor::getMaxYear();
+
+        if(empty($max)) {
+            Response::error("Nessun età massima trovata", Response::HTTP_BAD_REQUEST)->send();
+
+        }
+
+        Response::success($max[0])->send();
+    } catch(\Exception $e) {
+        Response::error("Errore nel recupero dell'età più alta: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
+
+/**
  * GET /api/actors/{id} - Lista utenti
  */
 Router::get('/actors/{id}', function ($id) {

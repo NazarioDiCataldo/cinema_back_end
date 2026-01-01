@@ -44,6 +44,43 @@ Router::get('/movies/{id}', function ($id) {
 });
 
 /**
+ * GET /api/movies/min_birth_year - Anno più basso
+ */
+Router::get('/movies/min_production_year', function() {
+    try {
+        //Mi prendo tutte le nazionalità
+        $min = Movie::getMinYear();
+
+        if(empty($min)) {
+            Response::error("Nessun anno minimo trovato", Response::HTTP_BAD_REQUEST)->send();
+        }
+
+        Response::success($min[0])->send();
+    } catch(\Exception $e) {
+        Response::error("Errore nel recupero dell'anno di produzione più basso: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
+
+/**
+ * GET /api/movies/max_birth_year - Anno più alto
+ */
+Router::get('/movies/max_production_year', function() {
+    try {
+        //Mi prendo tutte le nazionalità
+        $max = Movie::getMaxYear();
+
+        if(empty($max)) {
+            Response::error("Nessun anno massimo trovato", Response::HTTP_BAD_REQUEST)->send();
+
+        }
+
+        Response::success($max[0])->send();
+    } catch(\Exception $e) {
+        Response::error("Errore nel recupero dell'anno di produzione più alto: " . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine(), Response::HTTP_INTERNAL_SERVER_ERROR)->send();
+    }
+});
+
+/**
  * GET /api/movies/nationalities - Lista di tutte le nazionalità
  */
 Router::get('/movies/nationalities', function() {

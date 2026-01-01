@@ -139,6 +139,16 @@ class Movie extends BaseModel {
         return DB::select("SELECT DISTINCT nationality FROM " . static::getTableName());
     }
 
+    //Get min birth year
+    public static function getMinYear(): array {
+        return DB::select("SELECT DISTINCT MIN(production_year) FROM " . static::getTableName());
+    }
+
+    //Get max birth year
+    public static function getMaxYear(): array {
+        return DB::select("SELECT DISTINCT MAX(production_year) FROM " . static::getTableName());
+    }
+
     protected function actors()
     {
         return $this->belongsToMany(Actor::class);

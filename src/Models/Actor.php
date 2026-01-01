@@ -127,6 +127,16 @@ class Actor extends BaseModel {
         $bindings[':birth_year_to'] = $value;
     }  
 
+    //Get min birth year
+    public static function getMinYear(): array {
+        return DB::select("SELECT DISTINCT MIN(birth_year) FROM " . static::getTableName());
+    }
+
+    //Get max birth year
+    public static function getMaxYear(): array {
+        return DB::select("SELECT DISTINCT MAX(birth_year) FROM " . static::getTableName());
+    }
+
     public static function getAllNationality(): array {
         return DB::select("SELECT DISTINCT nationality FROM " . static::getTableName());
     }
